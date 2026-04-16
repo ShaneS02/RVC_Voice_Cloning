@@ -5,11 +5,11 @@ import soundfile as sf
 import logging
 from concurrent.futures import ProcessPoolExecutor, as_completed
 from tqdm import tqdm
-from config import TARGET_SR, RAW_AUDIO, PROCESSED_AUDIO
+#from config import TARGET_SR, RAW_AUDIO, PROCESSED_AUDIO
 
 logging.basicConfig(level=logging.INFO) # Set up logging to display info messages
 
-def process_file(input_path):
+def process_file(input_path, TARGET_SR, PROCESSED_AUDIO, RAW_AUDIO):
     try:
         #create a unique output path
         relative_path = os.path.relpath(input_path, RAW_AUDIO)
@@ -32,13 +32,22 @@ def process_file(input_path):
 
         # processing...
         logging.info(f"Processed: {relative_path}")
-        return
+        return {
+            "status": "success",
+            "input": input_path,
+            "output": output_path
+        }
     
     except Exception as e:
         logging.error(f"Error: {input_path} → {e}")
+        return {
+            "status": "failed",
+            "input": input_path,
+            "error": str(e)
+        }
 
 
-def preprocess_all():
+def preprocess_all(PROCESSED_AUDIO, RAW_AUDIO):
     os.makedirs(PROCESSED_AUDIO, exist_ok=True) # Create processed audio directory if it doesn't exist
 
     tasks = [] 
@@ -52,7 +61,7 @@ def preprocess_all():
     #Validate dataset
     if not tasks:
         logging.warning("No audio files found in the raw audio directory.")
-        return
+        return {}
     
     logging.info(f"Found {len(tasks)} audio files to process. Starting preprocessing...")
     processed = 0
@@ -62,6 +71,7 @@ def preprocess_all():
     with ProcessPoolExecutor(max_workers=os.cpu_count()) as executor:
         #start processing tasks in parallel
         futures = {executor.submit(process_file, task): task for task in tasks}
+        results = []
             
         # Log results and show progress with tqdm as tasks complete. 
         # Note: as_complted returns futures as they finish, so we can log results in real-time.
@@ -69,9 +79,17 @@ def preprocess_all():
             try:
                 result = future.result() # Get the result of the processing task (if any)
                 logging.info(result)
-                processed += 1
+                results.append(result)
             except Exception as e:
-                failed += 1
                 logging.error(f"Processing Failed: {e}")
 
+    processed = sum(r["status"] == "success" for r in results)
+    failed = sum(r["status"] == "failed" for r in results)
     logging.info(f"Preprocessing complete → Success: {processed}, Failed: {failed}")
+    
+    return {
+        "total": len(results),
+        "processed": processed,
+        "failed": failed,
+        "results": results
+    }
