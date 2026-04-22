@@ -3,26 +3,10 @@ from pathlib import Path
 import numpy as np
 import soundfile as sf
 import os
-import pytest
 
-from rvc_pipeline import process_file, ProcessConfig
+from rvc_pipeline import process_file, ExecutionResult
 
 # Note: These tests focus on the process_file function
-
-@pytest.fixture
-def config_with_dirs(tmp_path):
-    raw_dir = tmp_path / "raw"
-    processed_dir = tmp_path / "processed"
-
-    raw_dir.mkdir()
-    processed_dir.mkdir()
-
-    return ProcessConfig(
-        raw_audio=str(raw_dir),
-        processed_audio=str(processed_dir),
-        target_sr=16000
-    )
-
 
 # Helper function to create dummy audio files for testing
 def create_dummy_wav(file_path, duration_sec=1.0, sample_rate=40000, silence=False):
@@ -43,8 +27,7 @@ def test_process_file_returns_structure(config_with_dirs):
     result = process_file(str(dummy_audio), config_with_dirs)
 
     assert result is not None
-    assert "status" in result
-    assert "input" in result
+    assert isinstance(result, ExecutionResult)
 
 # Test that valid files are processed successfully
 def test_process_file_valid(config_with_dirs):
@@ -55,7 +38,7 @@ def test_process_file_valid(config_with_dirs):
 
     # Process the file and assert success
     result = process_file(str(file_path), config_with_dirs)   
-    assert result["status"] == "success"
+    assert result.status == "success"
 
     # Check output exists and has correct properties
     output_files = list(Path(config_with_dirs.processed_audio).glob("**/*.wav"))
@@ -89,8 +72,8 @@ def test_process_skips_processed_files(config_with_dirs):
 
     result = process_file(str(input_file), config_with_dirs)
 
-    assert result["status"] == "skipped"
-    assert result["output"] == str(output_file)
+    assert result.status == "skipped"
+    assert result.output == None
 
 # Test that files in nested directories are processed and output structure is preserved
 def test_process_file_nested_directories(config_with_dirs):
@@ -107,7 +90,7 @@ def test_process_file_nested_directories(config_with_dirs):
     processed_dir = Path(config_with_dirs.processed_audio)
     expected_output = processed_dir / "speaker1" / "sessionA" / "voice.wav"
 
-    assert result["status"] == "success"
+    assert result.status == "success"
     assert expected_output.exists()
-    assert result["output"] == str(expected_output)
+    assert result.output == str(expected_output)
     assert os.path.commonpath([expected_output, processed_dir]) == config_with_dirs.processed_audio

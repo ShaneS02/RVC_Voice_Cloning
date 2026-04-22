@@ -1,25 +1,11 @@
 
+import logging
 import numpy as np
 import soundfile as sf
-import pytest
-
-
-from rvc_pipeline import preprocess_all, ProcessConfig
+from rvc_pipeline import preprocess_all
 from pathlib import Path
 
-@pytest.fixture
-def config_with_dirs(tmp_path):
-    raw_dir = tmp_path / "raw"
-    processed_dir = tmp_path / "processed"
-
-    raw_dir.mkdir()
-    processed_dir.mkdir()
-
-    return ProcessConfig(
-        raw_audio=str(raw_dir),
-        processed_audio=str(processed_dir),
-        target_sr=16000
-    )
+logger = logging.getLogger(__name__)  # Create a logger for this module
 
 # Helper function to create dummy audio files for testing
 def create_dummy_wav(file_path, duration_sec=1.0, sample_rate=40000, silence=False):
@@ -52,11 +38,12 @@ def test_preprocess_all_mixed_file_types(config_with_dirs):
     (raw_dir / "ignore.txt").write_text("not audio")
     (raw_dir / "data.json").write_text("{}")
 
-    result = preprocess_all(config_with_dirs)
+    results = preprocess_all(config_with_dirs)
 
-    assert result["total"] == 3
-    assert result["processed"] == 3
-    assert result["failed"] == 0
+    assert results["summary"]["total_files"] == 3
+    assert results["summary"]["success"] == 3
+    assert results["summary"]["failed"] == 0
+    assert results["summary"]["skipped"] == 0
 
 #Test parallel processing stability with multiple files and a corrupt file
 def test_preprocess_all_parallel_stability(config_with_dirs):
@@ -70,9 +57,10 @@ def test_preprocess_all_parallel_stability(config_with_dirs):
 
     result = preprocess_all(config_with_dirs)
 
-    assert result["total"] == 11
-    assert result["processed"] == 10
-    assert result["failed"] == 1
+    assert result["summary"]["total_files"] == 11
+    assert result["summary"]["success"] == 10
+    assert result["summary"]["failed"] == 1
+    assert result["summary"]["skipped"] == 0
 
     # Ensure all outputs exist
     for i in range(10):
