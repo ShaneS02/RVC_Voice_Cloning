@@ -9,6 +9,7 @@ class ProcessConfig(BaseModel):
 
     target_sr: int = 40000 # Target sampling rate for audio processing, standard for RVC training
     chunk_length: int = 8000  # milliseconds (8 sec)
+    min_chunk_length: int = 0.3 # seconds (300 ms) - minimum length of audio chunk to be included in training
     min_silence_length: int = 400 # milliseconds (0.4 sec) - minimum length of silence to be considered as silence
     silence_threshold: int = -40 # Volume level (in dB) below which audio is considered “silent”.
 

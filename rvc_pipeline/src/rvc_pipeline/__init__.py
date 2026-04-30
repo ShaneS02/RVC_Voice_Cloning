@@ -12,6 +12,8 @@ from .utils.data_manager.file_handler import (
     file_path_exists,
 )
 
+from .utils.data_manager.audio_handler import load_audio, normalize_audio, split_audio, save_audio
+
 __all__ = [
     "ProcessConfig",
     "ExecutionResult",
@@ -25,5 +27,10 @@ __all__ = [
     "get_relative_path",
     "create_audio_file_path",
     "get_directory_from_file_path",
-    "file_path_exists"
+    "file_path_exists",
+    "load_audio",
+    "normalize_audio",
+    "split_audio",
+    "save_audio"
+
 ]

@@ -1,11 +1,14 @@
 # formatting audio files for RVC training
 import time
-import librosa
-import soundfile as sf
 import logging
 
 from .execution_results import ExecutionResult, summarize_results
 from .utils.concurrency.task_executor import execute_parallel_tasks
+from .utils.data_manager.audio_handler import (
+    load_audio, 
+    normalize_audio, 
+    save_audio
+)
 from .utils.data_manager.file_handler import (
     create_directory,
     load_audio_files,
@@ -35,16 +38,16 @@ def process_file(input_path, config):
             )
 
         # Load audio, resample to TARGET_SR, and convert to mono
-        audio, _ = librosa.load(input_path, sr=config.target_sr, mono=True)
+        audio, _ = load_audio(input_path, sample_rate=config.target_sr, mono=True)
 
         if audio is None or len(audio) == 0:
             raise ValueError("Empty audio file")
 
         # Normalize (important for RVC)
-        audio = librosa.util.normalize(audio)
+        audio = normalize_audio(audio)
 
         # Save 
-        sf.write(output_path, audio, config.target_sr)
+        save_audio(output_path, audio, config.target_sr)
 
         # processing...
         logger.info(f"Processed: {relative_path}")
