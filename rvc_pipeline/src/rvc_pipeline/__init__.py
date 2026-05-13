@@ -10,6 +10,7 @@ from .utils.data_manager.file_handler import (
     create_audio_file_path,
     get_directory_from_file_path,
     file_path_exists,
+    split_file_path
 )
 
 from .utils.data_manager.audio_handler import load_audio, normalize_audio, split_audio, save_audio
@@ -28,6 +29,7 @@ __all__ = [
     "create_audio_file_path",
     "get_directory_from_file_path",
     "file_path_exists",
+    "split_file_path",
     "load_audio",
     "normalize_audio",
     "split_audio",

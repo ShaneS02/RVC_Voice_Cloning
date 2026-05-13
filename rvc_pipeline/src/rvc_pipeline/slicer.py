@@ -12,15 +12,15 @@ from .utils.data_manager.audio_handler import (
 from .utils.data_manager.file_handler import (
     create_audio_file_path, 
     create_directory, 
-    get_directory_from_file_path,
+    get_directory_from_file_path,split_file_path,
     get_relative_path, load_audio_files
 )
 
 logger = logging.getLogger(__name__)
 
-def generate_chunks(intervals, audio, sample_rate, config):
+def generate_chunks(intervals : list, audio, sample_rate, config):
     chunk_samples = int(config.chunk_length * sample_rate / 1000)
-    min_samples = int(config.min_chunk_length * sample_rate)
+    min_samples = int(config.min_chunk_length * sample_rate / 1000)
 
     # Process each non-silent interval and chunk it into smaller pieces
     for start, end in intervals:
@@ -35,21 +35,22 @@ def generate_chunks(intervals, audio, sample_rate, config):
 
             yield sub_chunk
 
-def save_chunks(chunks, output_path, sample_rate):
+def save_chunks(chunks, output_file_path : str, sample_rate : int):
     file_index = 1
     failed_count = 0
+    file_path_no_ext, _ = split_file_path(output_file_path)
 
     # Process each non-silent interval and chunk it into smaller pieces
     for chunk in chunks:
-        out_path = output_path.parent / f"{output_path.stem}_{file_index}.wav"
+        output_path = f"{file_path_no_ext}_{file_index}.wav"
         
         try:
-            save_audio(out_path, chunk, sample_rate) # Save chunk as .wav
+            save_audio(output_path, chunk, sample_rate) # Save chunk as .wav
             file_index += 1
         except Exception as e:
+            logger.exception(e)
             failed_count += 1
             
-    
     return {"saved": file_index - 1, "failed": failed_count}
 
 
