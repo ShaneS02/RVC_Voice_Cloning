@@ -80,15 +80,15 @@ def slice_file(audio_path, config: ProcessConfig) -> int:
 
         if save_results["saved"] == 0:
             return ExecutionResult.error(
-                input=audio_path,
-                error="No valid chunks produced"
+                audio_path,
+                error_msg="No valid chunks produced"
             )
 
-        return ExecutionResult.success(input=audio_path, output=config.dataset_dir)
+        return ExecutionResult.success(audio_path, config.dataset_dir)
 
     except Exception as e:
         logger.error(f"Failed slicing {audio_path}: {e}")
-        return ExecutionResult.error(input=audio_path, error=str(e))
+        return ExecutionResult.error(audio_path, error_msg=str(e))
 
 def slice_audio(config: ProcessConfig):
     # Create dataset directory if it doesn't exist
