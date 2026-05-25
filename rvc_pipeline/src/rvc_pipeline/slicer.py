@@ -1,7 +1,7 @@
 #(remove silence + chunk)
 
 import logging
-from .config import ProcessConfig
+from .config.process_config import ProcessConfig
 from .utils.concurrency.task_executor import execute_parallel_tasks
 from .execution_results import ExecutionResult, summarize_results
 from .utils.data_manager.audio_handler import (

@@ -1,5 +1,5 @@
 from .preprocess import process_file, preprocess_all
-from .config import ProcessConfig
+from .config.process_config import ProcessConfig
 from .logging.logging_config import setup_logging
 from .utils.concurrency.task_executor import execute_parallel_tasks
 from .execution_results import ExecutionResult, summarize_results

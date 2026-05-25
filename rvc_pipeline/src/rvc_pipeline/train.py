@@ -1,18 +1,18 @@
 #trigger RVC training
 import subprocess
 
-from rvc_pipeline.config import EXPERIMENT_NAME, RVC_DIR
+from .config.process_config import ProcessConfig
 
-def train():
+def train(config : ProcessConfig):
     subprocess.run(
         [
             "python",
             "infer/modules/train/train.py",
-            "-e", EXPERIMENT_NAME,
+            "-e", config.experiment_name,
             "-sr", "40k",
             "-f0", "1",
             "-bs", "8",
             "-g", "0"
         ],
-        cwd=RVC_DIR  # Set the working directory to the RVC repository
+        cwd=config.rvc_dir  # Set the working directory to the RVC repository
     )

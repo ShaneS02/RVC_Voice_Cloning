@@ -2,6 +2,8 @@
 import time
 import logging
 
+from .config.process_config import ProcessConfig
+
 from .execution_results import ExecutionResult, summarize_results
 from .utils.concurrency.task_executor import execute_parallel_tasks
 from .utils.data_manager.audio_handler import (
@@ -20,7 +22,7 @@ from .utils.data_manager.file_handler import (
 
 logger = logging.getLogger(__name__)  # Create a logger for this module
 
-def process_file(input_path, config):
+def process_file(input_path, config: ProcessConfig) -> ExecutionResult:
     try:
         # create a unique output path
         relative_path = get_relative_path(input_path, config.raw_audio)
@@ -58,7 +60,7 @@ def process_file(input_path, config):
         return ExecutionResult.error(input_path, str(e))
 
 
-def preprocess_all(config):
+def preprocess_all(config: ProcessConfig):
     start_time = time.time()
     
     #create processed audio directory if it doesn't exist

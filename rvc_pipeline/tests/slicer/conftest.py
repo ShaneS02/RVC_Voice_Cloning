@@ -2,7 +2,7 @@ import os
 
 import pytest
 from rvc_pipeline import setup_logging
-from rvc_pipeline.config import ProcessConfig
+from rvc_pipeline import ProcessConfig
 
 @pytest.fixture(scope="session", autouse=True)
 def configure_logging():
